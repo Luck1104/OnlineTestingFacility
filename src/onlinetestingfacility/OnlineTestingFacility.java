@@ -88,15 +88,16 @@ public class OnlineTestingFacility {
     private void mainMenu() {
         if (person.getTestCreator()) {
             System.out.println("Enter 1 to take a test, 2 to create a test, "
-                    + "3 to edit an existing test, or 4 to review account information");
+                    + "3 to edit an existing test, 4 to review account information, or 5 to logout");
             Scanner scanChoice = new Scanner(System.in);
             int choice = scanChoice.nextInt();
             
             switch (choice) {
-                case 1 -> this.takeTest();
+                case 1 -> this.listTests();
                 case 2 -> this.createTest();
                 case 3 -> this.editTest();
                 case 4 -> this.viewInformation();
+                case 5 -> this.start();
                 default -> System.out.println("Invalid operation.");
             }
         }
@@ -106,7 +107,7 @@ public class OnlineTestingFacility {
             int choice = scanChoice.nextInt();
             
             switch (choice) {
-                case 1 -> this.takeTest();
+                case 1 -> this.listTests();
                 case 2 -> this.viewInformation();
                 default -> System.out.println("Invalid operation.");
             }
@@ -114,8 +115,8 @@ public class OnlineTestingFacility {
     }
     
     //TODO, added so mainMenu() does't throw an error
-    private void takeTest() {
-        System.out.println("takeTest() Chosen");
+    private void listTests() {
+        System.out.println("listTests() Chosen");
     }
     
     //TODO, added so mainMenu() does't throw an error
@@ -130,9 +131,88 @@ public class OnlineTestingFacility {
         
     }
     
-    //TODO, added so mainMenu() does't throw an error
     private void viewInformation() {
-        System.out.println("viewInformation() Chosen");
+            System.out.println("Account Information: " + person.toString() + 
+                    "\nEnter 1 go back to the main menu, 2 to update your username, 3 to update your password"
+                    + ", 4 to change test creator status, or 5 to delete your account");
+            Scanner scanChoice = new Scanner(System.in);
+            int choice = scanChoice.nextInt();
+            
+            switch (choice) {
+                case 1 -> this.mainMenu();
+                case 2 -> this.changeUsername();
+                case 3 -> this.changePassword();
+                case 4 -> this.changeTestCreatorStatus();
+                case 5 -> this.deleteAccount();
+                default -> System.out.println("Invalid operation.");
+            }
+    }
+    
+    private void changeUsername() {
+        System.out.println("Enter your new username");
+        Scanner scan = new Scanner(System.in);
+        
+        try {
+            person = new Person(scan.next(), person.getPassword(), person.getTestCreator());
+        }
+        catch(SQLException e) {
+            System.out.println("changeUsername() threw SQLException");
+            e.printStackTrace();
+        }
+        
+        System.out.println("Username successfully changed!");
+        this.viewInformation();
+    }
+    
+    private void changePassword() {
+        System.out.println("Enter your new password");
+        Scanner scan = new Scanner(System.in);
+        
+        try {
+            person = new Person(person.getUsername(), scan.next(), person.getTestCreator());
+        }
+        catch(SQLException e) {
+            System.out.println("changePassword() threw SQLException");
+            e.printStackTrace();
+        }
+        
+        System.out.println("Password successfully changed!");
+        this.viewInformation();
+    }
+    
+    //TODO, need to make it delete all their tests, questions, and choices
+    private void changeTestCreatorStatus() {
+        if (person.getTestCreator()) {
+            System.out.println("WARNING! This will deleted all created tests! Enter yes to confirm");
+            Scanner scan = new Scanner(System.in);
+            
+            if (scan.next().toLowerCase().contains("yes")) person.setTestCreator(false);
+            
+            //TODO, need to make it delete all their tests, questions, and choices
+            
+            System.out.println("Creator status and tests successfully removed");
+        }
+        else { 
+            person.setTestCreator(true);
+            System.out.println("You're now a test creator!");
+        }
+        this.viewInformation();
+    }
+    
+    //TODO, need to make it delete all their tests, questions, and choices
+    private void deleteAccount() {
+        System.out.println("Are you sure you want to delete your account? "
+                + "This will also delete all your tests. yes or no");
+        Scanner scan = new Scanner(System.in);
+        if (scan.next().toLowerCase().contains("yes")) {
+            try {
+                person.delete();
+            }
+            catch(SQLException e) {
+                System.out.println("person.delete() threw SQLException");
+                e.printStackTrace();
+            }
+        }
         
     }
     
