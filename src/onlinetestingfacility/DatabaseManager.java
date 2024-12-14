@@ -1,19 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package onlinetestingfacility;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-/**
- *
- * @author aiden
- */
 public class DatabaseManager {
-    private static String jdbcURL = "jdbc:postgresql://localhost:5432/simple_company";
+    private static String jdbcURL = "jdbc:postgresql://localhost:5432/DatabaseSystemsFinalProject";
     private static String username = "postgres";
     private static String password = "postgres123";
     

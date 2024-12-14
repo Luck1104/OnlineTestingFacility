@@ -1,24 +1,21 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package onlinetestingfacility;
 
 import java.sql.*;
 
 /**
- *
- * @author aiden
+ * Represents a person in the online testing facility
  */
 public class Person {
-    
+    // Attributes corresponding to the person table in the database
     private int person_id;
     private String username;
     private String password;
     private boolean is_test_creator;
     
+    // Default constructor
     public Person () {}
     
+    // Parameterized constructor
     public Person (String username, String password, boolean is_test_creator) throws SQLException {
         this.username = username;
         this.password = password;
@@ -69,7 +66,21 @@ public class Person {
         ResultSet rsOne = stmt.executeQuery();
         while (rsOne.next()) this.setPerson_id(rsOne.getInt("person_id"));
     }
+    
+    public void delete() throws SQLException{
+        String deletePerson = "DELETE FROM person WHERE person_id = ?";
+        
+        PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(deletePerson);
+        stmt.setInt(1, this.getPerson_id());
+        
+        stmt.executeUpdate();
+        this.person_id = 0;
+        this.username = null;
+        this.password = null;
+        this.is_test_creator = false;
+    }
 
+    // Getters and setters
     /**
      * @return the person_id
      */
@@ -125,13 +136,24 @@ public class Person {
     public void setTestCreator(Boolean is_test_creator) {
         this.is_test_creator = is_test_creator;
     }
-    
-    public void deletePerson() throws SQLException{
-        String insertPerson = "DELETE FROM person WHERE person_id = ?";
-        
-        PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(insertPerson);
-        stmt.setInt(1, this.getPerson_id());
-        
-        stmt.executeUpdate();
+
+    // Method to get highest score for a specific test
+//    public int getHighestScoreForTest(Test test) {
+//        return testsTaken.stream()
+//                .filter(t -> t.getTestId() == test.getTestId())
+//                .mapToInt(Test::getTotalScore)
+//                .max()
+//                .orElse(0);
+//    }
+
+    // toString method for easy printing and debugging
+    @Override
+    public String toString() {
+        return "Person{" +
+                "personId=" + person_id +
+                ", username='" + username + '\'' +
+                ", isTestCreator=" + is_test_creator +
+                //", testsTaken=" + testsTaken +
+                '}';
     }
 }
