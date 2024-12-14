@@ -70,7 +70,7 @@ public class OnlineTestingFacility {
         }
         catch(SQLException e) {
             System.out.println("getPersonByUsernameAndPassword threw SQLException");
-            e.printStackTrace(); //COMMENT THIS OUT FOR RELEASE
+            e.printStackTrace();
         }
         
         if (person == null) {
@@ -116,7 +116,48 @@ public class OnlineTestingFacility {
     
     //TODO, added so mainMenu() does't throw an error
     private void listTests() {
-        System.out.println("listTests() Chosen");
+        System.out.println("\nAll tests:");
+        String select = "SELECT * FROM creator_with_tests";
+        try {
+            //List out all the tests
+            PreparedStatement stmtSelect = DatabaseManager.getConnection().prepareStatement(select);
+            ResultSet rsOne = stmtSelect.executeQuery();
+            while (rsOne.next()) {
+                System.out.println(rsOne.getString("test_name") + 
+                        " {Creator: " + rsOne.getString("username") + ", Total Score: " 
+                        + rsOne.getInt("total_score") + "}");
+            }
+            
+            //Enter test choice
+            System.out.println("Enter the name of the test you would like to take, or enter 1 to return to the main menu");
+            Scanner scanChoice = new Scanner(System.in);
+            String choice = scanChoice.next();
+        
+            //Check if input is a valid test - TODO Not Working
+            rsOne = stmtSelect.executeQuery();
+            boolean isValidTest = false;
+            while (rsOne.next()) {
+                if (rsOne.getString("test_name").equals(choice)) isValidTest = true;
+            }
+            
+            //Do the option they chose, only let them take the test if they chose a valid test otherwise restart
+            if (choice.equals("1")) this.mainMenu();
+            else if (isValidTest) this.takeTest(choice);
+            else {
+                System.out.println("Invalid operation.");
+                this.listTests();
+            }
+        }
+        catch(SQLException e) {
+            System.out.println("listTests() threw SQLException");
+            e.printStackTrace();
+        }
+    }
+    
+    //TODO, added so mainMenu() does't throw an error
+    private void takeTest(String testName) {
+        System.out.println("createTest() Chosen");
+        
     }
     
     //TODO, added so mainMenu() does't throw an error
