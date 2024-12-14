@@ -4,17 +4,39 @@
  */
 package onlinetestingfacility;
 
+import java.util.Scanner;
+
 /**
  *
  * @author David
  */
 public class OnlineTestingFacility {
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        // TODO code application logic here
+    public void start() {
+        DatabaseManager.getConnection();
+        
+        String anotherRequest = "yes";
+        
+        while (anotherRequest.equalsIgnoreCase("yes")) {
+            
+//            Scanner scanChoice = new Scanner(System.in);
+//            System.out.println("Enter 1 to manage department, "
+//                + "2 to manage employee");
+//            int choice = scanChoice.nextInt();
+//            
+//            switch (choice) {
+//                case 1 -> this.manageDepartment();
+//                case 2 -> this.manageEmployee();
+//                default -> System.out.println("Invalid operation.");
+//            }
+            
+            System.out.println("Another request? ");
+            Scanner scanRequest = new Scanner(System.in);
+            anotherRequest = scanRequest.next();
+        }
     }
     
+    public static void main(String[] args) {
+        new OnlineTestingFacility().start();
+    }
 }
