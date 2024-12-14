@@ -19,18 +19,28 @@ public class Person {
     
     public Person () {}
     
-    public Person (int id, String username, String password, boolean is_test_creator) {
+    public Person (String username, String password, boolean is_test_creator) throws SQLException {
+        this.username = username;
+        this.password = password;
+        this.is_test_creator = is_test_creator;
+        
+        this.insert();
+    }
+    
+    //private because it should only be called by the getPersonByUsernameAndPassword method
+    private Person (int id, String username, String password, boolean is_test_creator) {
         this.person_id = id;
         this.username = username;
         this.password = password;
         this.is_test_creator = is_test_creator;
     }
     
-    public static Person getPersonByUsername (String person_username) throws SQLException {
-        String select = "SELECT * FROM person WHERE username = ?";
+    public Person getPersonByUsernameAndPassword (String person_username, String person_password) throws SQLException {
+        String select = "SELECT * FROM person WHERE username = ? AND passwrd = ?";
         
         PreparedStatement stmtSelect = DatabaseManager.getConnection().prepareStatement(select);
         stmtSelect.setString(1, person_username);
+        stmtSelect.setString(2, person_password);
         ResultSet rsOne = stmtSelect.executeQuery();
         
         Person person = null;
@@ -38,12 +48,12 @@ public class Person {
             person = new Person(rsOne.getInt("person_id"),
                 rsOne.getString("username"),
                 rsOne.getString("passwrd"),
-                rsOne.getBoolean("is_test_creater"));
+                rsOne.getBoolean("is_test_creator"));
         }
         return person;
     }
     
-    public int insert() throws SQLException{
+    public void insert() throws SQLException{
         String insertPerson = "INSERT INTO person (username, passwrd, is_test_creator) "
                 + "values (?, ?, ?)";
         
@@ -52,9 +62,12 @@ public class Person {
         stmt.setString(2, this.getPassword());
         stmt.setBoolean(3, this.getTestCreator());
         
-        int count = stmt.executeUpdate();
-
-        return count;
+        stmt.executeUpdate();
+        
+        String getId = "SELECT person_id FROM person WHERE person_id=(SELECT max(person_id) FROM person)";
+        stmt = DatabaseManager.getConnection().prepareStatement(getId);
+        ResultSet rsOne = stmt.executeQuery();
+        while (rsOne.next()) this.setPerson_id(rsOne.getInt("person_id"));
     }
 
     /**
@@ -67,9 +80,9 @@ public class Person {
     /**
      * @param person_id the person_id to set
      */
-//    public void setPerson_id(int person_id) {
-//        this.person_id = person_id;
-//    }
+    public void setPerson_id(int person_id) {
+        this.person_id = person_id;
+    }
 
     /**
      * @return the username
