@@ -1,16 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
- */
 package onlinetestingfacility;
 
 import java.sql.*;
 import java.util.Scanner;
+import java.util.Set;
 
-/**
- *
- * @author David
- */
 public class OnlineTestingFacility {
 
     Person person = null;
@@ -78,7 +71,7 @@ public class OnlineTestingFacility {
         }
         catch(SQLException e) {
             System.out.println("getPersonByUsernameAndPassword threw SQLException");
-            e.printStackTrace(); //COMMENT THIS OUT FOR RELEASE
+            e.printStackTrace();
         }
         
         if (person == null) {
@@ -96,34 +89,125 @@ public class OnlineTestingFacility {
     private void mainMenu() {
         if (person.getTestCreator()) {
             System.out.println("Enter 1 to take a test, 2 to create a test, "
-                    + "3 to edit an existing test, or 4 to review account information");
+                    + "3 to edit an existing test, 4 to review account information, or 5 to logout");
             Scanner scanChoice = new Scanner(System.in);
             int choice = scanChoice.nextInt();
             
             switch (choice) {
-                case 1 -> this.takeTest();
+                case 1 -> this.listTests();
                 case 2 -> this.createTest();
                 case 3 -> this.editTest();
                 case 4 -> this.viewInformation();
+                case 5 -> System.out.println();
                 default -> System.out.println("Invalid operation.");
             }
         }
         else {
-            System.out.println("Enter 1 to take a test or 2 to review account information");
+            System.out.println("Enter 1 to take a test, 2 to review account information, or 3 to logout");
             Scanner scanChoice = new Scanner(System.in);
             int choice = scanChoice.nextInt();
             
             switch (choice) {
-                case 1 -> this.takeTest();
+                case 1 -> this.listTests();
                 case 2 -> this.viewInformation();
+                case 3 -> System.out.println();
                 default -> System.out.println("Invalid operation.");
             }
         }
     }
     
+    //TODO
+    private void listTests() {
+        System.out.println("\nAll tests:");
+        String select = "SELECT * FROM creator_with_tests";
+        try {
+            //List out all the tests
+            PreparedStatement stmtSelect = DatabaseManager.getConnection().prepareStatement(select);
+            ResultSet rsOne = stmtSelect.executeQuery();
+            while (rsOne.next()) {
+                System.out.println("\'" + rsOne.getString("test_name") + "\'" + 
+                        " {Creator: " + rsOne.getString("username") + ", Total Score: " 
+                        + rsOne.getInt("total_score") + "}");
+            }
+            
+            //Enter test choice
+            System.out.println("Enter the name of the test you would like to take, enter 1 to search tests by creator, or enter 2 to return to the main menu");
+            Scanner scanChoice = new Scanner(System.in);
+            String choice = scanChoice.next();
+        
+            //Check if input is a valid test
+            rsOne = stmtSelect.executeQuery();
+            boolean isValidTest = false;
+            while (rsOne.next()) {
+                if (rsOne.getString("test_name").toLowerCase().contains(choice.toLowerCase())) isValidTest = true;
+            }
+            
+            //Do the option they chose, only let them take the test if they chose a valid test otherwise restart
+            if (choice.equals("1")) this.listTestsByCreator();
+            else if (choice.equals("2")) this.mainMenu();
+            else if (isValidTest) this.takeTest(choice);
+            else {
+                System.out.println("Invalid operation.");
+                this.listTests();
+            }
+        }
+        catch(SQLException e) {
+            System.out.println("listTests() threw SQLException");
+            e.printStackTrace();
+        }
+    }
+    
+    //TODO
+    private void listTestsByCreator() {
+        //Get creator name from input
+        System.out.println("Enter the name of the creator whose tests you would like to search for");
+        Scanner scanChoice = new Scanner(System.in);
+        String creator = scanChoice.next();
+        
+        System.out.println("\nAll tests:");
+        String selectPerson = "SELECT * FROM creator_with_tests WHERE LOWER(username) = ?";
+        try {
+            //List out all the tests for inputed creator
+            PreparedStatement stmtSelect = DatabaseManager.getConnection().prepareStatement(selectPerson);
+            stmtSelect.setString(1, creator.toLowerCase());
+            ResultSet rsOne = stmtSelect.executeQuery();
+            while (rsOne.next()) {
+                System.out.println("\'" + rsOne.getString("test_name") + "\'" + 
+                        " {Creator: " + rsOne.getString("username") + ", Total Score: " 
+                        + rsOne.getInt("total_score") + "}");
+            }
+            
+            //Enter test choice
+            System.out.println("Enter the name of the test you would like to take or enter 1 to return to the main menu");
+            scanChoice = new Scanner(System.in);
+            String choice = scanChoice.next();
+        
+            //Check if input is a valid test
+            rsOne = stmtSelect.executeQuery();
+            boolean isValidTest = false;
+            while (rsOne.next()) {
+                if (rsOne.getString("test_name").toLowerCase().contains(choice.toLowerCase())) isValidTest = true;
+            }
+            
+            //Do the option they chose, only let them take the test if they chose a valid test otherwise restart
+            if (choice.equals("1")) this.mainMenu();
+            else if (isValidTest) this.takeTest(choice);
+            else {
+                System.out.println("Invalid operation.");
+                this.listTests();
+            }
+            
+        }
+        catch(SQLException e) {
+            System.out.println("listTests() threw SQLException");
+            e.printStackTrace();
+        }
+    }
+    
     //TODO, added so mainMenu() does't throw an error
-    private void takeTest() {
-        System.out.println("takeTest() Chosen");
+    private void takeTest(String testName) {
+        System.out.println("createTest() Chosen");
+        this.mainMenu();
     }
     
     //TODO, added so mainMenu() does't throw an error
@@ -138,10 +222,128 @@ public class OnlineTestingFacility {
         
     }
     
-    //TODO, added so mainMenu() does't throw an error
     private void viewInformation() {
-        System.out.println("viewInformation() Chosen");
+            System.out.println("Account Information: " + "\'" + person.getUsername() + "\'" + 
+                        " {Password: " + person.getPassword() + ", isTestCreator: " 
+                        + person.getTestCreator() + "}" + 
+                    "\nEnter 1 go back to the main menu, 2 to update your username, 3 to update your password"
+                    + ", 4 to change test creator status, or 5 to delete your account");
+            Scanner scanChoice = new Scanner(System.in);
+            int choice = scanChoice.nextInt();
+            
+            switch (choice) {
+                case 1 -> this.mainMenu();
+                case 2 -> this.changeUsername();
+                case 3 -> this.changePassword();
+                case 4 -> this.changeTestCreatorStatus();
+                case 5 -> this.deleteAccount();
+                default -> System.out.println("Invalid operation.");
+            }
+    }
+    
+    private void changeUsername() {
+        //Get new username
+        System.out.println("Enter your new username");
+        Scanner scan = new Scanner(System.in);
         
+        //Update username in code
+        person.setUsername(scan.next());
+        
+        //Update username in database
+        try {
+            String updatePerson = "UPDATE person SET username = ? WHERE person_id = ?";
+            PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(updatePerson);
+            stmt.setString(1, person.getUsername());
+            stmt.setInt(2, person.getPerson_id());
+            stmt.executeUpdate();
+        }
+        catch(SQLException e) {
+            System.out.println("changeUsername() threw SQLException");
+            e.printStackTrace();
+        }
+        
+        System.out.println("Username successfully changed!");
+        this.viewInformation();
+    }
+    
+    private void changePassword() {
+        //Get new password
+        System.out.println("Enter your new password");
+        Scanner scan = new Scanner(System.in);
+        
+        //Update password in code
+        person.setPassword(scan.next());
+        
+        //Update password in database
+        try {
+            String updatePerson = "UPDATE person SET passwrd = ? WHERE person_id = ?";
+            PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(updatePerson);
+            stmt.setString(1, person.getPassword());
+            stmt.setInt(2, person.getPerson_id());
+            stmt.executeUpdate();
+        }
+        catch(SQLException e) {
+            System.out.println("changeUsername() threw SQLException");
+            e.printStackTrace();
+        }
+        
+        System.out.println("Password successfully changed!");
+        this.viewInformation();
+    }
+    
+    private void changeTestCreatorStatus() {
+        if (person.getTestCreator()) {
+            //Update is_test_creator in code
+            person.setTestCreator(false);
+
+            //Update is_test_creator in database
+            try {
+                String updatePerson = "UPDATE person SET is_test_creator = false WHERE person_id = ?";
+                PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(updatePerson);
+                stmt.setInt(1, person.getPerson_id());
+                stmt.executeUpdate();
+            }
+            catch(SQLException e) {
+                System.out.println("changeUsername() threw SQLException");
+                e.printStackTrace();
+            }
+            System.out.println("Creator status and tests successfully removed");
+        }
+        else { 
+            //Update is_test_creator in code
+            person.setTestCreator(true);
+
+            //Update is_test_creator in database
+            try {
+                String updatePerson = "UPDATE person SET is_test_creator = true WHERE person_id = ?";
+                PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(updatePerson);
+                stmt.setInt(1, person.getPerson_id());
+                stmt.executeUpdate();
+            }
+            catch(SQLException e) {
+                System.out.println("changeUsername() threw SQLException");
+                e.printStackTrace();
+            }
+            System.out.println("You're now a test creator!");
+        }
+        this.viewInformation();
+    }
+    
+    private void deleteAccount() {
+        System.out.println("Are you sure you want to delete your account? yes or no");
+        Scanner scan = new Scanner(System.in);
+        if (scan.next().toLowerCase().contains("yes")) {
+            try {
+                person.delete();
+            }
+            catch(SQLException e) {
+                System.out.println("person.delete() threw SQLException");
+                e.printStackTrace();
+            }
+        }
+        else {
+            this.viewInformation();
+        }
     }
     
     public static void main(String[] args) throws SQLException {
