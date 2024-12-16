@@ -1,70 +1,83 @@
 package onlinetestingfacility;
 
+import java.sql.*;
+import java.util.Scanner;
+
 /**
  * Represents a choice for a question in the online testing facility
- * /**
- * @author aiden 
  */
 public class Choice {
-    // Attributes corresponding to the choice table in the database
-    private int choiceId;
-    private int questionId;
-    private String choiceText;
-    private boolean isCorrect;
-
-    // Default constructor
-    public Choice() {
+    // Creates a question with text and a score and inserts it into the database
+    public static void createQuestion() throws SQLException {
+        System.out.println("Enter the text for the choice: ");
+        Scanner scan = new Scanner(System.in);
+        String text = scan.nextLine();
+        
+        System.out.println("Is this the correct choice? Type Y for yes, or type anything else for no.");
+        Scanner scan2 = new Scanner(System.in);
+        String str = scan2.nextLine();
+        boolean correct = false;
+        if (str.equals("Y"))
+        {
+            correct = true;
+        }
+        
+        String insertChoice = "INSERT INTO choice (question_id, choice_text, is_correct) "
+                + "VALUES (null, ?, ?)";
+        PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(insertChoice);
+        stmt.setString(1, text);
+        stmt.setBoolean(2, correct);
+        stmt.executeUpdate();
     }
-
-    // Parameterized constructor
-    public Choice(int choiceId, int questionId, String choiceText, boolean isCorrect) {
-        this.choiceId = choiceId;
-        this.questionId = questionId;
-        this.choiceText = choiceText;
-        this.isCorrect = isCorrect;
+    
+    // Updates the text of a specific choice
+    public static void updateChoiceText() throws SQLException {
+        System.out.println("Enter the id of the choice: ");
+        Scanner scan = new Scanner(System.in);
+        int id = Integer.parseInt(scan.nextLine());
+        
+        System.out.println("Enter the new text for the choice: ");
+        Scanner scan2 = new Scanner(System.in);
+        String text = scan2.nextLine();
+        
+        String changeText = "UPDATE choice SET choice_text = ? WHERE choice_id = ?";
+        PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(changeText);
+        stmt.setString(1, text);
+        stmt.setInt(2, id);
+        stmt.executeUpdate();
     }
-
-    // Getters and setters
-    public int getChoiceId() {
-        return choiceId;
+    
+    // Updates the correctness of a specific choice
+    public static void updateChoiceCorrectness() throws SQLException {
+        System.out.println("Enter the id of the choice: ");
+        Scanner scan = new Scanner(System.in);
+        int id = Integer.parseInt(scan.nextLine());
+        
+        System.out.println("Is this the correct choice? Type Y for yes, or type anything else for no.");
+        Scanner scan2 = new Scanner(System.in);
+        String str = scan2.nextLine();
+        boolean correct = false;
+        if (str.equals("Y"))
+        {
+            correct = true;
+        }
+        
+        String changeCorrectness = "UPDATE choice SET is_correct = ? WHERE choice_id = ?";
+        PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(changeCorrectness);
+        stmt.setBoolean(1, correct);
+        stmt.setInt(2, id);
+        stmt.executeUpdate();
     }
-
-    public void setChoiceId(int choiceId) {
-        this.choiceId = choiceId;
-    }
-
-    public int getQuestionId() {
-        return questionId;
-    }
-
-    public void setQuestionId(int questionId) {
-        this.questionId = questionId;
-    }
-
-    public String getChoiceText() {
-        return choiceText;
-    }
-
-    public void setChoiceText(String choiceText) {
-        this.choiceText = choiceText;
-    }
-
-    public boolean isCorrect() {
-        return isCorrect;
-    }
-
-    public void setCorrect(boolean correct) {
-        isCorrect = correct;
-    }
-
-    // toString method for easy printing and debugging
-    @Override
-    public String toString() {
-        return "Choice{" +
-                "choiceId=" + choiceId +
-                ", questionId=" + questionId +
-                ", choiceText='" + choiceText + '\'' +
-                ", isCorrect=" + isCorrect +
-                '}';
+    
+    // Deletes a specific choice
+    public static void deleteQuestion() throws SQLException {
+        System.out.println("Enter the id of the choice: ");
+        Scanner scan = new Scanner(System.in);
+        int id = Integer.parseInt(scan.nextLine());
+        
+        String deleteChoice = "DELETE FROM choice WHERE choice_id = ?";
+        PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(deleteChoice);
+        stmt.setInt(1, id);
+        stmt.executeUpdate();
     }
 }

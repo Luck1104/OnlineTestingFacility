@@ -1,97 +1,83 @@
 package onlinetestingfacility;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.*;
+import java.util.Scanner;
 
 /**
  * Represents a test in the online testing facility
  */
 public class Test {
-    // Attributes corresponding to the test table in the database
-    private int testId;
-    private int creatorId;
-    private String testName;
-    private int totalScore;
-
-    // List to store questions in the test
-    private List<Question> questions;
-
-    // Default constructor
-    public Test() {
-        this.questions = new ArrayList<>();
+    // Creates a test with a name and inserts it into the database
+    public static void createTest(int creator_id) throws SQLException {
+        System.out.println("Enter a name for the test: ");
+        Scanner scan = new Scanner(System.in);
+        String name = scan.nextLine();
+        
+        String insertTest = "INSERT INTO test (creator_id, test_name) "
+                + "VALUES (?, ?)";
+        PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(insertTest);
+        stmt.setInt(1, creator_id);
+        stmt.setString(2, name);
+        stmt.executeUpdate();
     }
-
-    // Parameterized constructor
-    public Test(int testId, int creatorId, String testName, int totalScore) {
-        this.testId = testId;
-        this.creatorId = creatorId;
-        this.testName = testName;
-        this.totalScore = totalScore;
-        this.questions = new ArrayList<>();
+    
+    // Updates the name of a specific test
+    public static void updateTestName() throws SQLException {
+        System.out.println("Enter the id of the test: ");
+        Scanner scan = new Scanner(System.in);
+        int id = Integer.parseInt(scan.nextLine());
+        
+        System.out.println("Enter the new name for the test: ");
+        Scanner scan2 = new Scanner(System.in);
+        String name = scan2.nextLine();
+        
+        String changeName = "UPDATE test SET test_name = ? WHERE test_id = ?";
+        PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(changeName);
+        stmt.setString(1, name);
+        stmt.setInt(2, id);
+        stmt.executeUpdate();
     }
-
-    // Getters and setters
-    public int getTestId() {
-        return testId;
+    
+    // Deletes a specific test
+    public static void deleteTest() throws SQLException {
+        System.out.println("Enter the id of the test: ");
+        Scanner scan = new Scanner(System.in);
+        int id = Integer.parseInt(scan.nextLine());
+        
+        String deleteTest = "DELETE FROM test WHERE test_id = ?";
+        PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(deleteTest);
+        stmt.setInt(1, id);
+        stmt.executeUpdate();
     }
-
-    public void setTestId(int testId) {
-        this.testId = testId;
+    
+    // Links a specific question to a specific test
+    public static void addQuestion() throws SQLException {
+        System.out.println("Enter the id of the test: ");
+        Scanner scan = new Scanner(System.in);
+        int test_id = Integer.parseInt(scan.nextLine());
+        
+        System.out.println("Enter the id of the question: ");
+        Scanner scan2 = new Scanner(System.in);
+        int question_id = Integer.parseInt(scan2.nextLine());
+        
+        String addQuestion = "INSERT INTO test_questions (test_id, question_id) "
+                + "VALUES (?, ?)";
+        PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(addQuestion);
+        stmt.setInt(1, test_id);
+        stmt.setInt(2, question_id);
+        stmt.executeUpdate();
     }
-
-    public int getCreatorId() {
-        return creatorId;
-    }
-
-    public void setCreatorId(int creatorId) {
-        this.creatorId = creatorId;
-    }
-
-    public String getTestName() {
-        return testName;
-    }
-
-    public void setTestName(String testName) {
-        this.testName = testName;
-    }
-
-    public int getTotalScore() {
-        return totalScore;
-    }
-
-    public void setTotalScore(int totalScore) {
-        this.totalScore = totalScore;
-    }
-
-    public List<Question> getQuestions() {
-        return questions;
-    }
-
-    public void setQuestions(List<Question> questions) {
-        this.questions = questions;
-    }
-
-    // Method to add a question to the test
-    public void addQuestion(Question question) {
-        this.questions.add(question);
-    }
-
-    // Method to calculate total score from questions
-    public int calculateTotalScore() {
-        return questions.stream()
-                .mapToInt(Question::getScore)
-                .sum();
-    }
-
-    // toString method for easy printing and debugging
-    @Override
-    public String toString() {
-        return "Test{" +
-                "testId=" + testId +
-                ", creatorId=" + creatorId +
-                ", testName='" + testName + '\'' +
-                ", totalScore=" + totalScore +
-                ", questions=" + questions +
-                '}';
+    
+    // Displays all the tests
+    public static void viewTests() throws SQLException {
+        String viewTests = "SELECT * FROM test";
+        
+        PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(viewTests);
+        ResultSet rs = stmt.executeQuery();
+            while(rs.next()) {
+                int test_id = rs.getInt("test_id");
+                String test_name = rs.getString("test_name");
+                System.out.println(test_id + " - " + test_name);
+            }
     }
 }
