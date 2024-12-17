@@ -80,4 +80,106 @@ public class Test {
                 System.out.println(test_id + " - " + test_name);
             }
     }
+    
+    /**
+     * Returns the number of users who have taken a specific test
+     * @param testId ID of the test
+     * @throws SQLException if database operation fails
+     */
+    public static int getTestTakerCount(int testId) throws SQLException {
+        if (testId == -1) return -1;
+        String selectTakerCount = "SELECT t.test_name, COUNT(DISTINCT pt.person_id) as total_takers " +
+                "FROM person_tests pt " +
+                "JOIN test t ON pt.test_id = t.test_id " +
+                "WHERE pt.test_id = ? " +
+                "GROUP BY t.test_name";
+        
+        PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(selectTakerCount);
+        stmt.setInt(1, testId);
+        
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) return rs.getInt("total_takers");
+        return -1;
+    }
+    
+    /**
+     * Returns the highest score for a specific test
+     * @param testId ID of the test
+     * @throws SQLException if database operation fails
+     */
+    public static int getHighestTestScore(int testId) throws SQLException {
+        if (testId == -1) return -1;
+        String selectHighestScore = "SELECT MAX(test_score) as highest_score " +
+                "FROM person_tests " +
+                "WHERE test_id = ? ";
+        
+        PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(selectHighestScore);
+        stmt.setInt(1, testId);
+        
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) return rs.getInt("highest_score");
+        return -1;
+    }
+    
+    /**
+     * Returns the username of who has the highest score for a specific test
+     * @param testId ID of the test
+     * @throws SQLException if database operation fails
+     */
+    public static String getHighestTestScoreTaker(int testId) throws SQLException {
+        if (testId == -1) return null;
+        String selectHighestScore = "SELECT p.username FROM person_tests pt " +
+                "JOIN person p ON pt.person_id = p.person_id " +
+                "WHERE pt.test_score = (SELECT MAX(test_score) "
+                + "FROM person_tests) AND pt.test_id = ?";
+        
+        PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(selectHighestScore);
+        stmt.setInt(1, testId);
+        
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) return rs.getString("username");
+        return null;
+    }
+    
+    /**
+     * Returns the average score for a specific test
+     * @param testId ID of the test
+     * @throws SQLException if database operation fails
+     */
+    public static int getAverageTestScore(int testId) throws SQLException {
+        if (testId == -1) return -1;
+        String selectAverageScore = "SELECT AVG(test_score) as average_score " +
+                "FROM person_tests " +
+                "WHERE test_id = ? ";
+        
+        PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(selectAverageScore);
+        stmt.setInt(1, testId);
+        
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) return rs.getInt("average_score");
+        return -1;
+    }
+    
+    /**
+     * Returns score for a specific user and test
+     * @param personId ID of the person
+     * @param testId ID of the test
+     * @throws SQLException if database operation fails
+     */
+    public static int getUserTestScore(int personId, int testId) throws SQLException {
+        if (testId == -1) return -1;
+        String selectScore = "SELECT p.username, t.test_name, pt.test_score " +
+                "FROM person_tests pt " +
+                "JOIN person p ON pt.person_id = p.person_id " +
+                "JOIN test t ON pt.test_id = t.test_id " +
+                "WHERE pt.person_id = ? AND pt.test_id = ?";
+        
+        PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(selectScore);
+        stmt.setInt(1, personId);
+        stmt.setInt(2, testId);
+        
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) return rs.getInt("test_score");
+        return -1;
+    }
 }

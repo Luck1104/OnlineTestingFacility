@@ -51,7 +51,7 @@ public class Person {
     }
     
     public void insert() throws SQLException{
-        String insertPerson = "INSERT INTO person (username, password, is_test_creator) "
+        String insertPerson = "INSERT INTO person (username, passwrd, is_test_creator) "
                 + "values (?, ?, ?)";
         
         PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(insertPerson);
@@ -74,7 +74,7 @@ public class Person {
         stmt.setInt(1, this.getPerson_id());
         
         stmt.executeUpdate();
-        this.person_id = 0;
+        this.person_id = -1;
         this.username = null;
         this.password = null;
         this.is_test_creator = false;
@@ -136,15 +136,6 @@ public class Person {
     public void setTestCreator(Boolean is_test_creator) {
         this.is_test_creator = is_test_creator;
     }
-
-    // Method to get highest score for a specific test
-//    public int getHighestScoreForTest(Test test) {
-//        return testsTaken.stream()
-//                .filter(t -> t.getTestId() == test.getTestId())
-//                .mapToInt(Test::getTotalScore)
-//                .max()
-//                .orElse(0);
-//    }
 
     // toString method for easy printing and debugging
     @Override
