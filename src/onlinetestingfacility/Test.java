@@ -183,7 +183,7 @@ public class Test {
         ResultSet rs = stmt.executeQuery();
         if (rs.next()) return rs.getInt("test_score");
         return -1;
-
+    }
     // Allows a user to take a test and adds their score to the database
     public static void takeTest(int person_id) throws SQLException {
         int score_count = 0;
