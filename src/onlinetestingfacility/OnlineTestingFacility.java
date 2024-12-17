@@ -103,7 +103,7 @@ public class OnlineTestingFacility {
             }
         }
         else {
-            System.out.println("Enter 1 to take a test, 2 to review account information, or 3 to logout");
+            System.out.println("Enter 1 to view tests, 2 to review account information, or 3 to logout");
             Scanner scanChoice = new Scanner(System.in);
             int choice = scanChoice.nextInt();
             
@@ -116,7 +116,6 @@ public class OnlineTestingFacility {
         }
     }
     
-    //TODO
     private void listTests() {
         System.out.println("\nAll tests:");
         String select = "SELECT * FROM creator_with_tests";
@@ -131,21 +130,25 @@ public class OnlineTestingFacility {
             }
             
             //Enter test choice
-            System.out.println("Enter the name of the test you would like to take, enter 1 to search tests by creator, or enter 2 to return to the main menu");
+            System.out.println("Enter the name of the test you would like to view, enter 1 to search tests by creator, or enter 2 to return to the main menu");
             Scanner scanChoice = new Scanner(System.in);
             String choice = scanChoice.next();
         
             //Check if input is a valid test
             rsOne = stmtSelect.executeQuery();
             boolean isValidTest = false;
+            int testId = -1;
             while (rsOne.next()) {
-                if (rsOne.getString("test_name").toLowerCase().contains(choice.toLowerCase())) isValidTest = true;
+                if (rsOne.getString("test_name").toLowerCase().contains(choice.toLowerCase())) {
+                    isValidTest = true;
+                    testId = rsOne.getInt("test_id");
+                }
             }
             
             //Do the option they chose, only let them take the test if they chose a valid test otherwise restart
             if (choice.equals("1")) this.listTestsByCreator();
             else if (choice.equals("2")) this.mainMenu();
-            else if (isValidTest) this.takeTest(choice);
+            else if (isValidTest) this.viewTestInformation(testId);
             else {
                 System.out.println("Invalid operation.");
                 this.listTests();
@@ -156,8 +159,7 @@ public class OnlineTestingFacility {
             e.printStackTrace();
         }
     }
-    
-    //TODO
+     
     private void listTestsByCreator() {
         //Get creator name from input
         System.out.println("Enter the name of the creator whose tests you would like to search for");
@@ -185,13 +187,17 @@ public class OnlineTestingFacility {
             //Check if input is a valid test
             rsOne = stmtSelect.executeQuery();
             boolean isValidTest = false;
+            int testId = -1;
             while (rsOne.next()) {
-                if (rsOne.getString("test_name").toLowerCase().contains(choice.toLowerCase())) isValidTest = true;
+                if (rsOne.getString("test_name").toLowerCase().contains(choice.toLowerCase())) {
+                    isValidTest = true;
+                    testId = rsOne.getInt("test_id");
+                }
             }
             
             //Do the option they chose, only let them take the test if they chose a valid test otherwise restart
             if (choice.equals("1")) this.mainMenu();
-            else if (isValidTest) this.takeTest(choice);
+            else if (isValidTest) this.viewTestInformation(testId);
             else {
                 System.out.println("Invalid operation.");
                 this.listTests();
@@ -199,14 +205,69 @@ public class OnlineTestingFacility {
             
         }
         catch(SQLException e) {
-            System.out.println("listTests() threw SQLException");
+            System.out.println("listTestsByCreator() threw SQLException");
             e.printStackTrace();
         }
     }
     
-    //TODO, added so mainMenu() does't throw an error
+    private void viewTestInformation(int testId) {
+        String selectTest = "SELECT * FROM creator_with_tests WHERE test_id = ?";
+        try {
+            //Get test information
+            PreparedStatement stmtSelect = DatabaseManager.getConnection().prepareStatement(selectTest);
+            stmtSelect.setInt(1, testId);
+            ResultSet rsOne = stmtSelect.executeQuery();
+            
+            int creatorId = -1;
+            String creatorName = null;
+            String testName = null;
+            int testScore = -1;
+            while (rsOne.next()) {
+                testId = rsOne.getInt("test_id");
+                creatorId = rsOne.getInt("person_id");
+                testName = rsOne.getString("test_name");
+                creatorName = rsOne.getString("username");
+                testScore = rsOne.getInt("total_score");
+            }
+            
+            //Will always print test name, it's creator, and it's total score
+            System.out.println("\n\'" + testName + "\'" + 
+                    " \nCreator: " + creatorName + "\nTotal Score: " 
+                    + testScore);
+                
+            //Prints out test statistics if anyone's taken the test
+            int testTakers = new Test().getTestTakerCount(testId);
+            int highestScore = new Test().getHighestTestScore(testId);
+            int averageScore = new Test().getAverageTestScore(testId);
+            String highestScoreTaker = new Test().getHighestTestScoreTaker(testId);
+            if (testTakers != -1) {
+                System.out.println("Number of people who have taken the test: " + testTakers 
+                        + "\nHighest Score: " + highestScore + " by " + highestScoreTaker + 
+                        "\nAverage Score: " + averageScore);
+            }
+            
+            //Prints your test score if you've taken it
+            int personTestScore = new Test().getUserTestScore(person.getPerson_id(), testId);
+            if (personTestScore != -1) System.out.println("Your test score: " + personTestScore);
+            
+            //Enter if you want to take the test
+            System.out.println("If you would like to take this test? yes or no");
+            Scanner scanChoice = new Scanner(System.in);
+            String choice = scanChoice.next();
+            
+            //If entered "yes" take the test, otherwise go back to test list
+            if (choice.toLowerCase().contains("yes")) takeTest(testName);
+            else listTests();
+        }
+        catch(SQLException e) {
+            System.out.println("viewTestInformation() threw SQLException");
+            e.printStackTrace();
+        }
+    }
+    
+    //TODO, added so viewTestInformation() does't throw an error
     private void takeTest(String testName) {
-        System.out.println("createTest() Chosen");
+        System.out.println("takeTest() Chosen");
         this.mainMenu();
     }
     
