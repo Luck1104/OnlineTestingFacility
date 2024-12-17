@@ -51,7 +51,7 @@ public class Person {
     }
     
     public void insert() throws SQLException{
-        String insertPerson = "INSERT INTO person (username, passwrd, is_test_creator) "
+        String insertPerson = "INSERT INTO person (username, password, is_test_creator) "
                 + "values (?, ?, ?)";
         
         PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(insertPerson);
