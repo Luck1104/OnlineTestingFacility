@@ -87,14 +87,7 @@ public class Test {
         int score_count = 0;
         int question_count = 1;
         
-        String viewTests = "SELECT * FROM test";
-        PreparedStatement stmt = DatabaseManager.getConnection().prepareStatement(viewTests);
-        ResultSet rs = stmt.executeQuery();
-            while(rs.next()) {
-                int test_id = rs.getInt("test_id");
-                String test_name = rs.getString("test_name");
-                System.out.println(test_id + " - " + test_name);
-            }
+        viewTests();
             
         System.out.println("Enter the id of the test you wish to take: ");
         Scanner scan = new Scanner(System.in);
