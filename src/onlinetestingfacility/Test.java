@@ -93,6 +93,8 @@ public class Test {
         Scanner scan = new Scanner(System.in);
         int test_id = Integer.parseInt(scan.nextLine());
         
+        System.out.println("");
+        
         String viewQuestions = "SELECT question_id, score, question_text FROM test_with_questions WHERE test_id = ?";
         PreparedStatement stmt2 = DatabaseManager.getConnection().prepareStatement(viewQuestions);
         stmt2.setInt(1, test_id);
@@ -129,11 +131,15 @@ public class Test {
                 stmt4.setInt(1, question_id);
                 stmt4.setString(2, chosen_choice_text);
                 ResultSet rs4 = stmt4.executeQuery();
-                boolean is_correct = rs4.getBoolean("is_correct");
+                boolean is_correct = false;
+                while(rs4.next()) {
+                    is_correct = rs4.getBoolean("is_correct");
+                }
                 if(is_correct) {
                     score_count += score;
                 }
                 question_count++;
+                System.out.println("");
             }
         
         int total_score = totalScore(test_id);
