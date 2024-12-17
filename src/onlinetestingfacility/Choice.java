@@ -70,7 +70,7 @@ public class Choice {
     }
     
     // Deletes a specific choice
-    public static void deleteQuestion() throws SQLException {
+    public static void deleteChoice() throws SQLException {
         System.out.println("Enter the id of the choice: ");
         Scanner scan = new Scanner(System.in);
         int id = Integer.parseInt(scan.nextLine());
